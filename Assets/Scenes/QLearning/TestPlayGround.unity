@@ -456,7 +456,7 @@ MonoBehaviour:
   agent: {fileID: 1405488106}
   oponent: {fileID: 921274857}
   speed: 10
-  qMindClass: QMind.QMindDummy, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+  qMindClass: GrupoG.QMindTester, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
     PublicKeyToken=null
 --- !u!4 &403569453
 Transform:
@@ -528,7 +528,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worldResolution: 1
-  debugWorld: 1
+  debugWorld: 0
 --- !u!1 &472187814
 GameObject:
   m_ObjectHideFlags: 0
