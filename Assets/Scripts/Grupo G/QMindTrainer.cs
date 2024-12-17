@@ -1,10 +1,11 @@
-using NavigationDJIA.Interfaces;
+ using NavigationDJIA.Interfaces;
 using NavigationDJIA.World;
 using QMind;
 using QMind.Interfaces;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -41,6 +42,18 @@ namespace GrupoG
 
         public void DoStep(bool train)
         {
+            /*
+            if(terminal_state)
+            {
+                state = RandomState();
+            }
+
+            state = GetStateGraph(AgentPosition, OtherPosition);
+            action = selectAction(state, available_actions);
+            next_state, reward = Random.Range(0, 4);
+            updateQTable(State, Action, next_state, reward);
+            */
+
             int action = Random.Range(0, 4);
             CellInfo newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
             CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, AgentPosition, 1);
