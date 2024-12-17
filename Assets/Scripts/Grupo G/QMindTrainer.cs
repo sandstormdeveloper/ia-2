@@ -58,7 +58,7 @@ namespace GrupoG
             CellInfo newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
             CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, AgentPosition, 1);
             AgentPosition = newAgentPosition;
-            //OtherPosition = path[1];
+            OtherPosition = path[0];
             Debug.Log("QMindTrainerDummy: DoStep");
         }
     }
