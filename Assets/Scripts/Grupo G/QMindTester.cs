@@ -8,6 +8,7 @@ namespace GrupoG
 {
     public class QMindTester : IQMind
     {
+        private Dictionary 
 
         public void Initialize(WorldInfo worldInfo)
         {
