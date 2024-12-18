@@ -87,6 +87,22 @@ namespace GrupoG
 
             }
 
+            return 0;
+        }
+
+        private void UpdateQTable(State state, int action, float reward, State nextState)
+        {
+
+        }
+
+        private float CalulateReward(CellInfo AgentPosition, CellInfo OtherPosition)
+        {
+            return 0;
+        }
+
+        private CellInfo UpdateEnvironment(int action)
+        {
+            return null;
         }
     }
 }

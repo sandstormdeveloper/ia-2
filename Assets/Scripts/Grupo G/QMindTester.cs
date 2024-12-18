@@ -8,12 +8,13 @@ namespace GrupoG
 {
     public class QMindTester : IQMind
     {
-        private Dictionary 
+
+        //private Dictionary<> QTable;
 
         public void Initialize(WorldInfo worldInfo)
         {
             Debug.Log("QMindDummy: initialized");
-            QTable = LoadQTable();
+            //QTable = LoadQTable();
         }
 
         public CellInfo GetNextStep(CellInfo currentPosition, CellInfo otherPosition)
@@ -21,5 +22,11 @@ namespace GrupoG
             Debug.Log("QMindDummy: GetNextStep");
             return null;
         }
+        /*
+        Dictionary<> LoadQTable()
+        {
+
+        }
+        */
     }
 }
