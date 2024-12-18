@@ -55,12 +55,21 @@ namespace GrupoG
             next_state, reward = Random.Range(0, 4);
             updateQTable(State, Action, next_state, reward);
 
+            if (terminal_state)
+            {
+                ReturnAveraged = (float)(ReturnAveraged*0.9 + Return*0.1);
+                ResetEnvironment();
+            }
+
             State state = new State(AgentPosition, OtherPosition);
             int action = selectAction(state);
             (CellInfo newAgentPosition, CellInfo newOtherPosition) = UpdateEnvironment(action);
             State nextState = new State(newAgentPosition, newOtherPosition);
             float reward = CalculateReward(newAgentPositionm, newOtherPosition);
-            UpdateQTable(state, action)
+            UpdateQTable(state, action, reward, nextState);
+
+            AgentPosition = newAgentPosition;
+            OtherPosition = newOtherPosition;
             */
 
             int action = Random.Range(0, 4);

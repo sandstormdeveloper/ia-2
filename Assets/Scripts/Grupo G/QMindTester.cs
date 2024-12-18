@@ -8,9 +8,11 @@ namespace GrupoG
 {
     public class QMindTester : IQMind
     {
+
         public void Initialize(WorldInfo worldInfo)
         {
             Debug.Log("QMindDummy: initialized");
+            QTable = LoadQTable();
         }
 
         public CellInfo GetNextStep(CellInfo currentPosition, CellInfo otherPosition)
