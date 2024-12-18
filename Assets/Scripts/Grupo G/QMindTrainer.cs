@@ -40,6 +40,8 @@ namespace GrupoG
             OnEpisodeStarted?.Invoke(this, EventArgs.Empty);
         }
 
+        //DESMARCAR SHOW SIMULATION PARA ENTRENARLO
+
         public void DoStep(bool train)
         {
             /*
@@ -52,6 +54,13 @@ namespace GrupoG
             action = selectAction(state, available_actions);
             next_state, reward = Random.Range(0, 4);
             updateQTable(State, Action, next_state, reward);
+
+            State state = new State(AgentPosition, OtherPosition);
+            int action = selectAction(state);
+            (CellInfo newAgentPosition, CellInfo newOtherPosition) = UpdateEnvironment(action);
+            State nextState = new State(newAgentPosition, newOtherPosition);
+            float reward = CalculateReward(newAgentPositionm, newOtherPosition);
+            UpdateQTable(state, action)
             */
 
             int action = Random.Range(0, 4);
@@ -60,6 +69,15 @@ namespace GrupoG
             AgentPosition = newAgentPosition;
             OtherPosition = path[0];
             Debug.Log("QMindTrainerDummy: DoStep");
+        }
+
+        private int selectAction(State state)
+        {
+            if (Random.Range(0f, 1f) < _qMindTrainerParams.epsilon)
+            {
+
+            }
+
         }
     }
 }
