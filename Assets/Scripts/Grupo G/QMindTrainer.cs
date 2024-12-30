@@ -25,6 +25,8 @@ namespace GrupoG
         private QMindTrainerParams _qMindTrainerParams;
         private WorldInfo _worldInfo;
         private INavigationAlgorithm _navigationAlgorithm;
+        private bool terminal_state = false;
+        private Dictionary<(State, int), float> QTable;
 
 
         public void Initialize(QMindTrainerParams qMindTrainerParams, WorldInfo worldInfo, INavigationAlgorithm navigationAlgorithm)
@@ -43,18 +45,7 @@ namespace GrupoG
         //DESMARCAR SHOW SIMULATION PARA ENTRENARLO
 
         public void DoStep(bool train)
-        {
-            /*
-            if(terminal_state)
-            {
-                state = RandomState();
-            }
-
-            state = GetStateGraph(AgentPosition, OtherPosition);
-            action = selectAction(state, available_actions);
-            next_state, reward = Random.Range(0, 4);
-            updateQTable(State, Action, next_state, reward);
-
+        { 
             if (terminal_state)
             {
                 ReturnAveraged = (float)(ReturnAveraged*0.9 + Return*0.1);
@@ -65,44 +56,109 @@ namespace GrupoG
             int action = selectAction(state);
             (CellInfo newAgentPosition, CellInfo newOtherPosition) = UpdateEnvironment(action);
             State nextState = new State(newAgentPosition, newOtherPosition);
-            float reward = CalculateReward(newAgentPositionm, newOtherPosition);
-            UpdateQTable(state, action, reward, nextState);
+            float reward = CalculateReward(newAgentPosition, newOtherPosition);
+            
+            if (train)
+            {
+                UpdateQTable(state, action, reward, nextState);
+            }
 
             AgentPosition = newAgentPosition;
             OtherPosition = newOtherPosition;
-            */
+            
+            
 
-            int action = Random.Range(0, 4);
+            /*int action = Random.Range(0, 4);
             CellInfo newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
             CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, AgentPosition, 1);
             AgentPosition = newAgentPosition;
             OtherPosition = path[0];
             Debug.Log("QMindTrainerDummy: DoStep");
+            */
         }
 
+        //Función para determinar cuando el jugador ha pillado al agente (ha llegado a su misma casilla)
+        private void terminalState(CellInfo agentPosition, CellInfo otherPosition)
+        {
+            terminal_state = agentPosition == otherPosition;
+        }    
+
+
+        //Función para seleccionar la acción que va a realizar el agente
         private int selectAction(State state)
         {
             if (Random.Range(0f, 1f) < _qMindTrainerParams.epsilon)
             {
-
+                return Random.Range(0, 4);
             }
 
-            return 0;
+            return getBestAction(state);
         }
 
+        private int getBestAction(State state)
+        {
+            float maxQValue = float.MinValue;
+            int bestAction = 0;
+
+            for (int action = 0; action < 4; action++)
+            {
+                float qValue = getQValue(state, action);
+                if (qValue > maxQValue) 
+                {
+                   maxQValue = qValue;
+                   bestAction = action;
+                }
+            }
+
+            return bestAction;
+        }
+
+        private float getQValue(State state, int action)
+        {
+            var key = (state, action);
+            return QTable.ContainsKey(key) ? QTable[key] : 0f;
+        }
         private void UpdateQTable(State state, int action, float reward, State nextState)
         {
+            var key = (state, action);
 
+            if (QTable.ContainsKey(key))
+            {
+                float current_QValue = QTable[key];
+                QTable[key] = (current_QValue + reward) / 2f;
+            }
+            else
+            {
+                QTable[key] = reward;
+            }
         }
 
-        private float CalulateReward(CellInfo AgentPosition, CellInfo OtherPosition)
+        private float CalculateReward(CellInfo AgentPosition, CellInfo OtherPosition)
         {
-            return 0;
+            if (AgentPosition == OtherPosition)
+            {
+                return -1f;
+            }
+
+            return -0.1f;
         }
 
-        private CellInfo UpdateEnvironment(int action)
+        private void ResetEnvironment()
         {
-            return null;
+            AgentPosition = _worldInfo.RandomCell();
+            OtherPosition = _worldInfo.RandomCell();
+            OnEpisodeStarted?.Invoke(this, EventArgs.Empty);
+            Debug.Log("Reseting environment");
+        }
+
+        private (CellInfo, CellInfo) UpdateEnvironment(int action)
+        {
+            CellInfo newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
+
+            CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, AgentPosition, 1);
+            CellInfo newOtherPosition = path[0];
+
+            return (newAgentPosition, newOtherPosition);
         }
     }
 }

@@ -17,8 +17,8 @@ public class State
     public bool OPlayer;
 
     public float PlayerDistance;
-
-    public State(CellInfo AgentPos, CellInfo OtherPos)
+    
+public State(CellInfo AgentPos, CellInfo OtherPos)
     {
         //PlayerDistance = ;
     }
