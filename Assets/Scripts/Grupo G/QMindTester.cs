@@ -9,7 +9,7 @@ namespace GrupoG
     public class QMindTester : IQMind
     {
 
-        private Dictionary<(State, int), float> QTable;
+        private Dictionary<(int, int), float> QTable;
 
         public void Initialize(WorldInfo worldInfo)
         {
@@ -23,9 +23,9 @@ namespace GrupoG
             return null;
         }
         
-        private Dictionary<(State, int), float> LoadQTable()
+        public Dictionary<(int, int), float> LoadQTable()
         {
-            return new 
+            return null; 
         }
         
     }

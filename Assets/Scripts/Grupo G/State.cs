@@ -11,14 +11,12 @@ public class State
     public bool EWall;
     public bool OWall;
 
-    public bool NPlayer;
-    public bool SPlayer;
-    public bool EPlayer;
-    public bool OPlayer;
+    public bool playerAbove;
+    public bool playerRight;
 
     public float PlayerDistance;
     
-public State(CellInfo AgentPos, CellInfo OtherPos)
+    public State(CellInfo AgentPos, CellInfo OtherPos)
     {
         //PlayerDistance = ;
     }
@@ -30,10 +28,8 @@ public State(CellInfo AgentPos, CellInfo OtherPos)
                SWall == state.SWall &&
                EWall == state.EWall &&
                OWall == state.OWall &&
-               NPlayer == state.NPlayer &&
-               SPlayer == state.SPlayer &&
-               EPlayer == state.EPlayer &&
-               OPlayer == state.OPlayer &&
+               playerAbove == state.playerAbove &&
+               playerRight == state.playerRight &&
                PlayerDistance == state.PlayerDistance;
     }
 
@@ -44,10 +40,8 @@ public State(CellInfo AgentPos, CellInfo OtherPos)
         hash.Add(SWall);
         hash.Add(EWall);
         hash.Add(OWall);
-        hash.Add(NPlayer);
-        hash.Add(SPlayer);
-        hash.Add(EPlayer);
-        hash.Add(OPlayer);
+        hash.Add(playerAbove);
+        hash.Add(playerRight);
         hash.Add(PlayerDistance);
         return hash.ToHashCode();
     }

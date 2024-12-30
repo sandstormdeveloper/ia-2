@@ -26,7 +26,8 @@ namespace GrupoG
         private WorldInfo _worldInfo;
         private INavigationAlgorithm _navigationAlgorithm;
         private bool terminal_state = false;
-        private Dictionary<(State, int), float> QTable;
+        private Dictionary<(int, int), float> QTable;
+        private QMindTester _qTester;
 
 
         public void Initialize(QMindTrainerParams qMindTrainerParams, WorldInfo worldInfo, INavigationAlgorithm navigationAlgorithm)
@@ -35,6 +36,7 @@ namespace GrupoG
             _navigationAlgorithm = navigationAlgorithm;
             _qMindTrainerParams = qMindTrainerParams;
             _navigationAlgorithm.Initialize(_worldInfo);
+            QTable = _qTester.LoadQTable();
 
             Debug.Log("QMindTrainerDummy: initialized");
             AgentPosition = worldInfo.RandomCell();
