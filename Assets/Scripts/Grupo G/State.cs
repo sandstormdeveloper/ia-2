@@ -14,11 +14,18 @@ public class State
     public bool playerAbove;
     public bool playerRight;
 
-    public float PlayerDistance;
+    public float playerDistance;
     
-    public State(CellInfo AgentPos, CellInfo OtherPos)
+    public State(CellInfo AgentPos, CellInfo OtherPos, WorldInfo worldInfo)
     {
-        //PlayerDistance = ;
+        NWall = !worldInfo.NextCell(AgentPos, Directions.Up).Walkable;
+        SWall = !worldInfo.NextCell(AgentPos, Directions.Down).Walkable;
+        EWall = !worldInfo.NextCell(AgentPos, Directions.Right).Walkable;
+        OWall = !worldInfo.NextCell(AgentPos, Directions.Left).Walkable;
+
+        playerAbove = OtherPos.y > AgentPos.y;
+        playerRight = OtherPos.x > AgentPos.x;
+        playerDistance = AgentPos.Distance(OtherPos, CellInfo.DistanceType.Euclidean);
     }
 
     public override bool Equals(object obj)
@@ -30,7 +37,7 @@ public class State
                OWall == state.OWall &&
                playerAbove == state.playerAbove &&
                playerRight == state.playerRight &&
-               PlayerDistance == state.PlayerDistance;
+               playerDistance == state.playerDistance;
     }
 
     public override int GetHashCode()
@@ -42,7 +49,7 @@ public class State
         hash.Add(OWall);
         hash.Add(playerAbove);
         hash.Add(playerRight);
-        hash.Add(PlayerDistance);
+        hash.Add(playerDistance);
         return hash.ToHashCode();
     }
 }
