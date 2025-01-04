@@ -14,18 +14,25 @@ public class State
     public bool playerAbove;
     public bool playerRight;
 
-    public float playerDistance;
+    public int playerDistance;
     
     public State(CellInfo AgentPos, CellInfo OtherPos, WorldInfo worldInfo)
     {
-        NWall = !worldInfo.NextCell(AgentPos, Directions.Up).Walkable;
-        SWall = !worldInfo.NextCell(AgentPos, Directions.Down).Walkable;
-        EWall = !worldInfo.NextCell(AgentPos, Directions.Right).Walkable;
-        OWall = !worldInfo.NextCell(AgentPos, Directions.Left).Walkable;
+        NWall = !(worldInfo.NextCell(AgentPos, Directions.Up).Type == CellInfo.CellType.Wall);
+        SWall = !(worldInfo.NextCell(AgentPos, Directions.Down).Type == CellInfo.CellType.Wall);
+        EWall = !(worldInfo.NextCell(AgentPos, Directions.Right).Type == CellInfo.CellType.Wall);
+        OWall = !(worldInfo.NextCell(AgentPos, Directions.Left).Type == CellInfo.CellType.Wall);
 
         playerAbove = OtherPos.y > AgentPos.y;
         playerRight = OtherPos.x > AgentPos.x;
-        playerDistance = AgentPos.Distance(OtherPos, CellInfo.DistanceType.Euclidean);
+        playerDistance = BinDistance(AgentPos.Distance(OtherPos, CellInfo.DistanceType.Euclidean));
+    }
+
+    private int BinDistance(float distance)
+    {
+        if (distance < 3f) return 0;  // Cerca
+        else if (distance < 6f) return 1;  // Normal
+        return 2;  // Lejos
     }
 
     public override bool Equals(object obj)
