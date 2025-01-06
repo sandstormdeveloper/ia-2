@@ -582,7 +582,7 @@ MonoBehaviour:
   qLearningTrainerClass: GrupoG.QMindTrainer, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
     PublicKeyToken=null
   showSimulation: 1
-  agentSpeed: 3
+  agentSpeed: 100
   train: 1
   algorithmParams:
     alpha: 0.2

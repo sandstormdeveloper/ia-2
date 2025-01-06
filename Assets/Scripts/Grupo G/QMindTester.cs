@@ -109,16 +109,15 @@ namespace GrupoG
         private CellInfo ParseCellInfo(string cellString)
         {
             string[] coord = cellString.Split(';');
-            if (coord.Length != 3)
+            if (coord.Length < 2)
             {
                 throw new FormatException($"Formato de CellInfo invalido: {cellString}"); 
             }
 
-            float x = float.Parse(coord[0]);
-            float y = float.Parse(coord[1]);
-            float z = float.Parse(coord[2]);
+            int x = int.Parse(coord[0]);
+            int y = int.Parse(coord[1]);
 
-            return new CellInfo(new Vector3(x, y, z));
+            return new CellInfo(x, y);
         }
     }
 }
