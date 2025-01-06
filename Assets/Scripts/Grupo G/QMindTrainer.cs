@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Unity.VisualScripting;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
@@ -141,7 +142,15 @@ namespace GrupoG
 
         public void SaveQTableToCsv(string filePath)
         {
-            
+            using (StreamWriter writer = new StreamWriter(filePath))
+            { 
+                foreach(var entry in QTable)
+                {
+                    string state = entry.Key.Item1.ToString();
+                    int action = entry.Key.Item2;
+                    writer.WriteLine($"{state} {action}");
+                }
+            }
         }
 
         private float CalculateReward(CellInfo AgentPosition, CellInfo OtherPosition)
