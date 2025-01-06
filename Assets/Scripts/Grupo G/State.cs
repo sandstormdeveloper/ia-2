@@ -18,10 +18,10 @@ public class State
     
     public State(CellInfo AgentPos, CellInfo OtherPos, WorldInfo worldInfo)
     {
-        NWall = !(worldInfo.NextCell(AgentPos, Directions.Up).Type == CellInfo.CellType.Wall);
-        SWall = !(worldInfo.NextCell(AgentPos, Directions.Down).Type == CellInfo.CellType.Wall);
-        EWall = !(worldInfo.NextCell(AgentPos, Directions.Right).Type == CellInfo.CellType.Wall);
-        OWall = !(worldInfo.NextCell(AgentPos, Directions.Left).Type == CellInfo.CellType.Wall);
+        NWall = !worldInfo.NextCell(AgentPos, Directions.Up).Walkable;
+        SWall = !worldInfo.NextCell(AgentPos, Directions.Down).Walkable;
+        EWall = !worldInfo.NextCell(AgentPos, Directions.Right).Walkable;
+        OWall = !worldInfo.NextCell(AgentPos, Directions.Left).Walkable;
 
         playerAbove = OtherPos.y > AgentPos.y;
         playerRight = OtherPos.x > AgentPos.x;

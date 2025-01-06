@@ -29,9 +29,7 @@ namespace GrupoG
         private WorldInfo _worldInfo;
         private INavigationAlgorithm _navigationAlgorithm;
         private Dictionary<(State, int), float> QTable;
-        private bool terminal_state = false;
         float total_reward = 0;
-        private CellInfo lastValidPosition = null;
         string filePath = "TablaQ.csv";
         int saveRate = 0;
 
@@ -52,11 +50,12 @@ namespace GrupoG
         {
             saveRate -= 1;
 
-            if (terminal_state)
+            if (AgentPosition == OtherPosition || !AgentPosition.Walkable)
             {
                 ReturnAveraged = Mathf.Round((ReturnAveraged * 0.9f + Return * 0.1f) * 100) / 100;
                 OnEpisodeFinished?.Invoke(this, EventArgs.Empty);
                 ResetEnvironment();
+                return;
             }
 
             State currentState = new State(AgentPosition, OtherPosition, _worldInfo);
@@ -82,8 +81,6 @@ namespace GrupoG
             OtherPosition = newOtherPosition;
             CurrentStep++;
 
-            terminal_state = IsTerminalState();
-
             /*int action = Random.Range(0, 4);
             CellInfo newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
             CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, AgentPosition, 1);
@@ -91,21 +88,6 @@ namespace GrupoG
             OtherPosition = path[0];
             Debug.Log("QMindTrainerDummy: DoStep");
             */
-        }
-
-        private bool IsTerminalState()
-        {
-            if(AgentPosition == OtherPosition)
-            {
-                return true;
-            }
-
-            if(AgentPosition.Type == CellInfo.CellType.Limit)
-            {
-                return true;
-            }
-
-            return false;
         }
 
         //Función para seleccionar la acción que va a realizar el agente
@@ -167,19 +149,13 @@ namespace GrupoG
             if (AgentPosition == OtherPosition)
             {
                 Debug.Log("Agent was caught");
-                return -20f;
+                return -1f;
             }
 
-            if (AgentPosition.Type == CellInfo.CellType.Limit)
+            if (!AgentPosition.Walkable)
             {
                 Debug.Log("Agent went out of bounds");
-                return -10f;
-            }
-
-            if (AgentPosition.Type == CellInfo.CellType.Wall)
-            {
-                Debug.Log("Agent went inside a wall");
-                return -5f;
+                return -1f;
             }
 
             return 0.1f;
@@ -187,9 +163,7 @@ namespace GrupoG
 
         private void ResetEnvironment()
         {
-            terminal_state = false;
             AgentPosition = _worldInfo.RandomCell();
-            lastValidPosition = AgentPosition;
             OtherPosition = _worldInfo.RandomCell();
             CurrentEpisode++;
             CurrentStep = 0;
@@ -202,24 +176,10 @@ namespace GrupoG
         private (CellInfo, CellInfo) UpdateEnvironment(int action)
         {
             CellInfo newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
+            CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, AgentPosition, 1);
+            CellInfo newOtherPosition = path.Length > 0 ? path[0] : OtherPosition;
 
-            if(newAgentPosition.Walkable)
-            {
-                lastValidPosition = newAgentPosition;
-            }
-
-            CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, lastValidPosition, 1);
-
-            if (path != null)
-            {
-                if (path.Length > 0)
-                {
-                    CellInfo newOtherPosition = path[0];
-                    return (newAgentPosition, newOtherPosition);
-                }
-            }
-
-            return (newAgentPosition, OtherPosition);
+            return (newAgentPosition, newOtherPosition);
         }
     }
 }
