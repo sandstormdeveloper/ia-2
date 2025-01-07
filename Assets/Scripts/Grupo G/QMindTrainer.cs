@@ -31,7 +31,7 @@ namespace GrupoG
         private INavigationAlgorithm _navigationAlgorithm;
         private Dictionary<(State, int), float> QTable;
         float total_reward = 0;
-        string filePath = "TablaQ.csv";
+        string filePath = "Assets/Scripts/Grupo G/TablaQ.csv";
         int saveRate = 0;
 
         public void Initialize(QMindTrainerParams qMindTrainerParams, WorldInfo worldInfo, INavigationAlgorithm navigationAlgorithm)
@@ -148,7 +148,8 @@ namespace GrupoG
                 {
                     string state = entry.Key.Item1.ToString();
                     int action = entry.Key.Item2;
-                    writer.WriteLine($"{state} {action}");
+                    float qValue = entry.Value;
+                    writer.WriteLine($"{state} {action} {qValue}");
                 }
             }
         }

@@ -15,7 +15,7 @@ namespace GrupoG
 
         private Dictionary<(State, int), float> QTable;
         private WorldInfo _worldInfo;
-        string filePath = "TablaQ.csv";
+        string filePath = "Assets/Scripts/Grupo G/TablaQ.csv";
 
         public void Initialize(WorldInfo worldInfo)
         {
