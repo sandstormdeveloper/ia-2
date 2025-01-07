@@ -211,19 +211,19 @@ namespace GrupoG
 
         private float CalculateReward(CellInfo AgentPosition, CellInfo OtherPosition, CellInfo newAgentPosition, CellInfo newOtherPosition)
         {
-            if (AgentPosition == OtherPosition)
+            if (newAgentPosition == newOtherPosition)
             {
                 Debug.Log("Agent was caught");
-                return -1f;
+                return -100f;
             }
 
-            if (!AgentPosition.Walkable)
+            if (!newAgentPosition.Walkable)
             {
                 Debug.Log("Agent went out of bounds");
-                return -1f;
+                return -50f;
             }
 
-            if(newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) < AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
+            if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) < AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
             {
                 return -0.1f;
             } 
