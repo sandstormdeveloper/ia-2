@@ -21,11 +21,13 @@ namespace GrupoG
         {
             Debug.Log("QMindDummy: initialized");
             _worldInfo = worldInfo;
+            QTable = new Dictionary<(State, int), float>();
             QTable = LoadQTable(filePath);
         }
 
         public CellInfo GetNextStep(CellInfo currentPosition, CellInfo otherPosition)
         {
+            Debug.Log(QTable.Count);
             Debug.Log("QMindDummy: GetNextStep");
             State state = new State(currentPosition, otherPosition, _worldInfo);
             int action = GetBestAction(state);
@@ -57,67 +59,54 @@ namespace GrupoG
 
         public Dictionary<(State, int), float> LoadQTable(string filePath)
         {
-           
-            using (StreamReader reader = new StreamReader(filePath)) {
+
+            using (StreamReader reader = new StreamReader(filePath))
+            {
+                string header = reader.ReadLine();
+
+                while (!reader.EndOfStream)
                 {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
+                    string line = reader.ReadLine();
+                    string[] parts = line.Split(' ');
+
+                    if (parts.Length == 3)
                     {
-                        string[] parts = line.Split(' ');
-                        if (parts.Length != 3)
-                        {
-                            Debug.LogWarning($"Formato incorrecto en la linea: {line}");
-                            continue;
-                        }
+                        string stateId = parts[0];
+                        int action = int.Parse(parts[1]);
+                        float qValue = float.Parse(parts[2]);
 
-                        try
-                        {
-                            string stateString = parts[0];
-                            State state = ParseState(stateString);
+                        State state = ParseStateFromId(stateId);
 
-                            int action = int.Parse(parts[1]);
-
-                            float qValue = float.Parse(parts[2]);
-
-                            QTable[(state, action)] = qValue;
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.LogError($"Error al procesar la linea: {line}. {ex.Message}");
-                        }
+                        QTable[(state, action)] = qValue;
                     }
                 }
-                Debug.Log("Tabla q cargada correctamente.");
+
                 return QTable;
             }
         }
 
-        private State ParseState(string stateString)
+        private State ParseStateFromId(string stateId)
         {
-            string[] pos = stateString.Split(';');
-            if(pos.Length != 2)
+            bool NWall = stateId[0] == '1';
+            bool SWall = stateId[1] == '1';
+            bool EWall = stateId[2] == '1';
+            bool OWall = stateId[3] == '1';
+
+            bool playerAbove = stateId[4] == '1';
+            bool playerRight = stateId[5] == '1';
+
+            int playerDistance = int.Parse(stateId[6].ToString());
+
+            return new State(null, null, null)
             {
-                throw new FormatException($"Formato de estado invalido: {stateString}");
-            }
-
-            CellInfo agentPosition = ParseCellInfo(pos[0]);  
-            CellInfo otherPosition = ParseCellInfo(pos[1]);
-
-            return new State(agentPosition, otherPosition, _worldInfo);
-        }
-
-        private CellInfo ParseCellInfo(string cellString)
-        {
-            string[] coord = cellString.Split(';');
-            if (coord.Length < 2)
-            {
-                throw new FormatException($"Formato de CellInfo invalido: {cellString}"); 
-            }
-
-            int x = int.Parse(coord[0]);
-            int y = int.Parse(coord[1]);
-
-            return new CellInfo(x, y);
+                NWall = NWall,
+                SWall = SWall,
+                EWall = EWall,
+                OWall = OWall,
+                playerAbove = playerAbove,
+                playerRight = playerRight,
+                playerDistance = playerDistance
+            };
         }
     }
 }

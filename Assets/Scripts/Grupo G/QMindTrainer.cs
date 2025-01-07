@@ -42,6 +42,7 @@ namespace GrupoG
             _navigationAlgorithm.Initialize(_worldInfo);
             _qMindTrainerParams = qMindTrainerParams;
             QTable = new Dictionary<(State, int), float>();
+            QTable = LoadQTable(filePath);
             ResetEnvironment();
         }
 
@@ -143,15 +144,69 @@ namespace GrupoG
         public void SaveQTableToCsv(string filePath)
         {
             using (StreamWriter writer = new StreamWriter(filePath))
-            { 
-                foreach(var entry in QTable)
+            {
+                writer.WriteLine("State Action QValue");
+                foreach (var entry in QTable)
                 {
-                    string state = entry.Key.Item1.ToString();
+                    string stateId = entry.Key.Item1.StateId();
                     int action = entry.Key.Item2;
                     float qValue = entry.Value;
-                    writer.WriteLine($"{state} {action} {qValue}");
+                    writer.WriteLine($"{stateId} {action} {qValue}");
                 }
             }
+            Debug.Log($"QTable saved successfully to {filePath}");
+        }
+
+        public Dictionary<(State, int), float> LoadQTable(string filePath)
+        {
+
+            using (StreamReader reader = new StreamReader(filePath))
+            {
+                string header = reader.ReadLine();
+
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    string[] parts = line.Split(' ');
+
+                    if (parts.Length == 3)
+                    {
+                        string stateId = parts[0];
+                        int action = int.Parse(parts[1]);
+                        float qValue = float.Parse(parts[2]);
+
+                        State state = ParseStateFromId(stateId);
+
+                        QTable[(state, action)] = qValue;
+                    }
+                }
+
+                return QTable;
+            }
+        }
+
+        private State ParseStateFromId(string stateId)
+        {
+            bool NWall = stateId[0] == '1';
+            bool SWall = stateId[1] == '1';
+            bool EWall = stateId[2] == '1';
+            bool OWall = stateId[3] == '1';
+
+            bool playerAbove = stateId[4] == '1';
+            bool playerRight = stateId[5] == '1';
+
+            int playerDistance = int.Parse(stateId[6].ToString());
+
+            return new State(null, null, null)
+            {
+                NWall = NWall,
+                SWall = SWall,
+                EWall = EWall,
+                OWall = OWall,
+                playerAbove = playerAbove,
+                playerRight = playerRight,
+                playerDistance = playerDistance
+            };
         }
 
         private float CalculateReward(CellInfo AgentPosition, CellInfo OtherPosition)

@@ -18,14 +18,17 @@ public class State
     
     public State(CellInfo AgentPos, CellInfo OtherPos, WorldInfo worldInfo)
     {
-        NWall = !worldInfo.NextCell(AgentPos, Directions.Up).Walkable;
-        SWall = !worldInfo.NextCell(AgentPos, Directions.Down).Walkable;
-        EWall = !worldInfo.NextCell(AgentPos, Directions.Right).Walkable;
-        OWall = !worldInfo.NextCell(AgentPos, Directions.Left).Walkable;
+        if (AgentPos != null && OtherPos != null && worldInfo != null)
+        {
+            NWall = !worldInfo.NextCell(AgentPos, Directions.Up).Walkable;
+            SWall = !worldInfo.NextCell(AgentPos, Directions.Down).Walkable;
+            EWall = !worldInfo.NextCell(AgentPos, Directions.Right).Walkable;
+            OWall = !worldInfo.NextCell(AgentPos, Directions.Left).Walkable;
 
-        playerAbove = OtherPos.y > AgentPos.y;
-        playerRight = OtherPos.x > AgentPos.x;
-        playerDistance = BinDistance(AgentPos.Distance(OtherPos, CellInfo.DistanceType.Euclidean));
+            playerAbove = OtherPos.y > AgentPos.y;
+            playerRight = OtherPos.x > AgentPos.x;
+            playerDistance = BinDistance(AgentPos.Distance(OtherPos, CellInfo.DistanceType.Euclidean));
+        } 
     }
 
     private int BinDistance(float distance)
@@ -58,5 +61,22 @@ public class State
         hash.Add(playerRight);
         hash.Add(playerDistance);
         return hash.ToHashCode();
+    }
+
+    public string StateId()
+    {
+        string id = "";
+
+        id += NWall ? 1 : 0;
+        id += SWall ? 1 : 0;
+        id += EWall ? 1 : 0;
+        id += OWall ? 1 : 0;
+
+        id += playerAbove ? 1 : 0;
+        id += playerRight ? 1 : 0;
+
+        id += playerDistance;
+
+        return id;
     }
 }
