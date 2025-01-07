@@ -27,7 +27,6 @@ namespace GrupoG
 
         public CellInfo GetNextStep(CellInfo currentPosition, CellInfo otherPosition)
         {
-            Debug.Log(QTable.Count);
             Debug.Log("QMindDummy: GetNextStep");
             State state = new State(currentPosition, otherPosition, _worldInfo);
             int action = GetBestAction(state);

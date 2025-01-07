@@ -64,7 +64,7 @@ namespace GrupoG
             int action = SelectAction(currentState);
             (CellInfo newAgentPosition, CellInfo newOtherPosition) = UpdateEnvironment(action);
             State nextState = new State(newAgentPosition, newOtherPosition, _worldInfo);
-            float reward = CalculateReward(newAgentPosition, newOtherPosition);
+            float reward = CalculateReward(AgentPosition, OtherPosition, newAgentPosition, newOtherPosition);
             total_reward += reward;
             Return = Mathf.Round(total_reward * 10) / 10;
             
@@ -209,7 +209,7 @@ namespace GrupoG
             };
         }
 
-        private float CalculateReward(CellInfo AgentPosition, CellInfo OtherPosition)
+        private float CalculateReward(CellInfo AgentPosition, CellInfo OtherPosition, CellInfo newAgentPosition, CellInfo newOtherPosition)
         {
             if (AgentPosition == OtherPosition)
             {
@@ -223,7 +223,15 @@ namespace GrupoG
                 return -1f;
             }
 
-            return 0.1f;
+            if(newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) < AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
+            {
+                return -0.1f;
+            } 
+            else
+            {
+                return 0.1f;
+            }
+            
         }
 
         private void ResetEnvironment()
