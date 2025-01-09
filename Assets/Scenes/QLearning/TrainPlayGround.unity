@@ -588,7 +588,7 @@ MonoBehaviour:
     alpha: 0.2
     epsilon: 0.85
     gamma: 0.9
-    episodes: 10000
+    episodes: 100000
     maxSteps: -1
     episodesBetweenSaves: 100
 --- !u!4 &430024629
