@@ -60,7 +60,7 @@ namespace GrupoG
                     SaveQTableToCsv(filePath);
                 }
 
-                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.99999f);
+                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.9995f);
                 ResetEnvironment();
                 return;
             }
@@ -235,12 +235,10 @@ namespace GrupoG
                 reward -= 0.5f;
             }
 
-            if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) > AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
+            if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) >= AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
             {
                 reward += 1f;
             }
-
-            reward += 0.1f;
 
             return reward;
         }
