@@ -36,7 +36,6 @@ namespace GrupoG
 
         public void Initialize(QMindTrainerParams qMindTrainerParams, WorldInfo worldInfo, INavigationAlgorithm navigationAlgorithm)
         {
-            saveRate = qMindTrainerParams.episodesBetweenSaves;
             _worldInfo = worldInfo;
             _navigationAlgorithm = navigationAlgorithm;
             _navigationAlgorithm.Initialize(_worldInfo);
@@ -50,12 +49,18 @@ namespace GrupoG
 
         public void DoStep(bool train)
         {
-            saveRate -= 1;
-
             if (AgentPosition == OtherPosition || !AgentPosition.Walkable)
             {
                 ReturnAveraged = Mathf.Round((ReturnAveraged * 0.9f + Return * 0.1f) * 100) / 100;
                 OnEpisodeFinished?.Invoke(this, EventArgs.Empty);
+                saveRate += 1;
+
+                if (saveRate % _qMindTrainerParams.episodesBetweenSaves == 0)
+                {
+                    SaveQTableToCsv(filePath);
+                }
+
+                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.99999f);
                 ResetEnvironment();
                 return;
             }
@@ -64,19 +69,13 @@ namespace GrupoG
             int action = SelectAction(currentState);
             (CellInfo newAgentPosition, CellInfo newOtherPosition) = UpdateEnvironment(action);
             State nextState = new State(newAgentPosition, newOtherPosition, _worldInfo);
-            float reward = CalculateReward(newAgentPosition, newOtherPosition);
+            float reward = CalculateReward(AgentPosition, OtherPosition, newAgentPosition, newOtherPosition);
             total_reward += reward;
             Return = Mathf.Round(total_reward * 10) / 10;
             
             if (train)
             {
                 UpdateQTable(currentState, action, reward, nextState);
-
-                if (saveRate <= 0)
-                {
-                    SaveQTableToCsv(filePath);
-                    saveRate = _qMindTrainerParams.episodesBetweenSaves;
-                }
             }
 
             AgentPosition = newAgentPosition;
@@ -209,21 +208,41 @@ namespace GrupoG
             };
         }
 
-        private float CalculateReward(CellInfo AgentPosition, CellInfo OtherPosition)
+        private float CalculateReward(CellInfo AgentPosition, CellInfo OtherPosition, CellInfo newAgentPosition, CellInfo newOtherPosition)
         {
-            if (AgentPosition == OtherPosition)
+            float reward = 0f;
+
+            if (newAgentPosition == newOtherPosition)
             {
                 Debug.Log("Agent was caught");
-                return -100f;
+                reward -= 100f;
             }
 
-            if (!AgentPosition.Walkable)
+            if (newAgentPosition.Type == CellInfo.CellType.Limit)
             {
                 Debug.Log("Agent went out of bounds");
-                return -50f;
+                reward -= 50f;
             }
 
-            return 0.1f;
+            if (newAgentPosition.Type == CellInfo.CellType.Wall)
+            {
+                Debug.Log("Agent went into a wall");
+                reward -= 20f;
+            }
+
+            if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) < AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
+            {
+                reward -= 0.5f;
+            }
+
+            if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) > AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
+            {
+                reward += 1f;
+            }
+
+            reward += 0.1f;
+
+            return reward;
         }
 
         private void ResetEnvironment()
