@@ -49,7 +49,7 @@ namespace GrupoG
 
         public void DoStep(bool train)
         {
-            if (AgentPosition == OtherPosition || !AgentPosition.Walkable)
+            if (AgentPosition == OtherPosition || !AgentPosition.Walkable || CurrentStep >= 1000)
             {
                 ReturnAveraged = Mathf.Round((ReturnAveraged * 0.9f + Return * 0.1f) * 100) / 100;
                 OnEpisodeFinished?.Invoke(this, EventArgs.Empty);
