@@ -40,6 +40,12 @@ namespace GrupoG
             _navigationAlgorithm = navigationAlgorithm;
             _navigationAlgorithm.Initialize(_worldInfo);
             _qMindTrainerParams = qMindTrainerParams;
+
+            if (PlayerPrefs.HasKey("e"))
+            {
+                _qMindTrainerParams.epsilon = PlayerPrefs.GetFloat("e");
+            }
+
             QTable = new Dictionary<(State, int), float>();
             QTable = LoadQTable(filePath);
             ResetEnvironment();
@@ -60,7 +66,11 @@ namespace GrupoG
                     SaveQTableToCsv(filePath);
                 }
 
-                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.9995f);
+                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.999f);
+
+                PlayerPrefs.SetFloat("e", _qMindTrainerParams.epsilon);
+                PlayerPrefs.Save();
+
                 ResetEnvironment();
                 return;
             }
@@ -227,12 +237,12 @@ namespace GrupoG
             if (newAgentPosition.Type == CellInfo.CellType.Wall)
             {
                 Debug.Log("Agent went into a wall");
-                reward -= 20f;
+                reward -= 10f;
             }
 
             if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) < AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
             {
-                reward -= 0.5f;
+                reward -= 1f;
             }
 
             if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) >= AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
