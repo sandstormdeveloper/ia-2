@@ -30,7 +30,13 @@ namespace GrupoG
             Debug.Log("QMindDummy: GetNextStep");
             State state = new State(currentPosition, otherPosition, _worldInfo);
             int action = GetBestAction(state);
-            return _worldInfo.NextCell(currentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
+
+            if (action < 4)
+            {
+                return _worldInfo.NextCell(currentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
+            }
+
+            return currentPosition;
         }
 
         private int GetBestAction(State state)
