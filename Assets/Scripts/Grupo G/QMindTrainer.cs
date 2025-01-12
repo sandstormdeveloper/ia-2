@@ -36,15 +36,12 @@ namespace GrupoG
 
         public void Initialize(QMindTrainerParams qMindTrainerParams, WorldInfo worldInfo, INavigationAlgorithm navigationAlgorithm)
         {
+            Application.runInBackground = true;
+
             _worldInfo = worldInfo;
             _navigationAlgorithm = navigationAlgorithm;
             _navigationAlgorithm.Initialize(_worldInfo);
             _qMindTrainerParams = qMindTrainerParams;
-
-            //if (PlayerPrefs.HasKey("e"))
-            //{
-            //    _qMindTrainerParams.epsilon = PlayerPrefs.GetFloat("e");
-            //}
 
             QTable = new Dictionary<(State, int), float>();
             QTable = LoadQTable(filePath);
@@ -67,9 +64,6 @@ namespace GrupoG
                 }
 
                 _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.9999f);
-
-                //PlayerPrefs.SetFloat("e", _qMindTrainerParams.epsilon);
-                //PlayerPrefs.Save();
 
                 ResetEnvironment();
                 return;
