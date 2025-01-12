@@ -41,10 +41,10 @@ namespace GrupoG
             _navigationAlgorithm.Initialize(_worldInfo);
             _qMindTrainerParams = qMindTrainerParams;
 
-            if (PlayerPrefs.HasKey("e"))
-            {
-                _qMindTrainerParams.epsilon = PlayerPrefs.GetFloat("e");
-            }
+            //if (PlayerPrefs.HasKey("e"))
+            //{
+            //    _qMindTrainerParams.epsilon = PlayerPrefs.GetFloat("e");
+            //}
 
             QTable = new Dictionary<(State, int), float>();
             QTable = LoadQTable(filePath);
@@ -55,7 +55,7 @@ namespace GrupoG
 
         public void DoStep(bool train)
         {
-            if (AgentPosition == OtherPosition || !AgentPosition.Walkable || CurrentStep >= 1000)
+            if (AgentPosition == OtherPosition || !AgentPosition.Walkable || CurrentStep >= 10000)
             {
                 ReturnAveraged = Mathf.Round((ReturnAveraged * 0.9f + Return * 0.1f) * 100) / 100;
                 OnEpisodeFinished?.Invoke(this, EventArgs.Empty);
@@ -66,10 +66,10 @@ namespace GrupoG
                     SaveQTableToCsv(filePath);
                 }
 
-                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.999f);
+                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.9999f);
 
-                PlayerPrefs.SetFloat("e", _qMindTrainerParams.epsilon);
-                PlayerPrefs.Save();
+                //PlayerPrefs.SetFloat("e", _qMindTrainerParams.epsilon);
+                //PlayerPrefs.Save();
 
                 ResetEnvironment();
                 return;
@@ -91,14 +91,6 @@ namespace GrupoG
             AgentPosition = newAgentPosition;
             OtherPosition = newOtherPosition;
             CurrentStep++;
-
-            /*int action = Random.Range(0, 4);
-            CellInfo newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
-            CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, AgentPosition, 1);
-            AgentPosition = newAgentPosition;
-            OtherPosition = path[0];
-            Debug.Log("QMindTrainerDummy: DoStep");
-            */
         }
 
         //Función para seleccionar la acción que va a realizar el agente
@@ -242,7 +234,7 @@ namespace GrupoG
 
             if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) < AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
             {
-                reward -= 1f;
+                reward -= 0.5f;
             }
 
             if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) >= AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
