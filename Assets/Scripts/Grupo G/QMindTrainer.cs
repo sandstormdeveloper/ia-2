@@ -63,7 +63,7 @@ namespace GrupoG
                     SaveQTableToCsv(filePath);
                 }
 
-                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.9999f);
+                //_qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.9999f);
 
                 ResetEnvironment();
                 return;
