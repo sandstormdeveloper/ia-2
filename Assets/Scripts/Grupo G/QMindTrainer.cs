@@ -63,7 +63,7 @@ namespace GrupoG
                     SaveQTableToCsv(filePath);
                 }
 
-                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.995f);
+                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.9999f);
 
                 ResetEnvironment();
                 return;
@@ -206,44 +206,22 @@ namespace GrupoG
 
         private float CalculateReward(CellInfo AgentPosition, CellInfo OtherPosition, CellInfo newAgentPosition, CellInfo newOtherPosition)
         {
-            float reward = 0f;
+            float distance = AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean);
+            float newDistance = newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean);
 
-            if (newAgentPosition == newOtherPosition)
+            if(newAgentPosition == newOtherPosition || !newAgentPosition.Walkable)
             {
-                Debug.Log("Agent was caught");
-                reward -= 100f;
+                return -100f;
             }
 
-            if (!newAgentPosition.Walkable)
+            if (newDistance < distance)
             {
-                Debug.Log("Agent went out of bounds");
-                reward -= 50f;
-            }
-
-            if (newAgentPosition.Type == CellInfo.CellType.Wall)
+                return -10f;
+            } 
+            else
             {
-                Debug.Log("Agent went out of bounds");
-                reward -= 20f;
+                return 10f;
             }
-
-            if(newAgentPosition == AgentPosition)
-            {
-                reward -= 0.01f;
-            }
-
-            if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) < AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
-            {
-                reward -= 0.5f;
-            }
-
-            if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) > AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
-            {
-                reward += 1f;
-            }
-
-            reward += 0.1f;
-
-            return reward;
         }
 
         private void ResetEnvironment()
