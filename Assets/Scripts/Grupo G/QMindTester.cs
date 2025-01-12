@@ -38,7 +38,7 @@ namespace GrupoG
             float maxQValue = float.MinValue;
             int bestAction = 0;
 
-            for (int action = 0; action < 4; action++)
+            for (int action = 0; action < 5; action++)
             {
                 float qValue = GetQValue(state, action);
                 if (qValue > maxQValue)

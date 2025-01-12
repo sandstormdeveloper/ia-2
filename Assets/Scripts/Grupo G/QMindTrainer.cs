@@ -66,7 +66,7 @@ namespace GrupoG
                     SaveQTableToCsv(filePath);
                 }
 
-                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.9995f);
+                _qMindTrainerParams.epsilon = Mathf.Max(0.01f, _qMindTrainerParams.epsilon * 0.9999f);
 
                 //PlayerPrefs.SetFloat("e", _qMindTrainerParams.epsilon);
                 //PlayerPrefs.Save();
@@ -98,7 +98,7 @@ namespace GrupoG
         {
             if (Random.Range(0f, 1f) < _qMindTrainerParams.epsilon)
             {
-                return Random.Range(0, 4);
+                return Random.Range(0, 5);
             }
 
             return GetBestAction(state);
@@ -109,7 +109,7 @@ namespace GrupoG
             float maxQValue = float.MinValue;
             int bestAction = 0;
 
-            for (int action = 0; action < 4; action++)
+            for (int action = 0; action < 5; action++)
             {
                 float qValue = GetQValue(state, action);
                 if (qValue > maxQValue) 
@@ -132,7 +132,7 @@ namespace GrupoG
             float currentQ = GetQValue(state, action);
             float maxNextQ = float.MinValue;
 
-            for (int nextAction = 0; nextAction < 4; nextAction++)
+            for (int nextAction = 0; nextAction < 5; nextAction++)
             {
                 float nextQ = GetQValue(nextState, nextAction);
                 maxNextQ = MathF.Max(maxNextQ, nextQ);
@@ -220,7 +220,7 @@ namespace GrupoG
                 reward -= 100f;
             }
 
-            if (newAgentPosition.Type == CellInfo.CellType.Limit)
+            if (!newAgentPosition.Walkable)
             {
                 Debug.Log("Agent went out of bounds");
                 reward -= 50f;
@@ -228,19 +228,26 @@ namespace GrupoG
 
             if (newAgentPosition.Type == CellInfo.CellType.Wall)
             {
-                Debug.Log("Agent went into a wall");
+                Debug.Log("Agent went out of bounds");
                 reward -= 20f;
+            }
+
+            if(newAgentPosition == AgentPosition)
+            {
+                reward -= 0.01f;
             }
 
             if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) < AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
             {
-                reward -= 1f;
+                reward -= 0.5f;
             }
 
-            if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) >= AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
+            if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) > AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
             {
                 reward += 1f;
             }
+
+            reward += 0.1f;
 
             return reward;
         }
@@ -259,7 +266,13 @@ namespace GrupoG
 
         private (CellInfo, CellInfo) UpdateEnvironment(int action)
         {
-            CellInfo newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
+            CellInfo newAgentPosition = AgentPosition;
+
+            if (action < 4)
+            {
+                newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
+            }
+            
             CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, AgentPosition, 1);
             CellInfo newOtherPosition = path.Length > 0 ? path[0] : OtherPosition;
 
