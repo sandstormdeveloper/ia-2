@@ -229,7 +229,7 @@ namespace GrupoG
             if (newAgentPosition.Type == CellInfo.CellType.Wall)
             {
                 Debug.Log("Agent went into a wall");
-                reward -= 10f;
+                reward -= 20f;
             }
 
             if (newAgentPosition.Distance(newOtherPosition, CellInfo.DistanceType.Euclidean) < AgentPosition.Distance(OtherPosition, CellInfo.DistanceType.Euclidean))
