@@ -32,7 +32,7 @@ namespace GrupoG
         private Dictionary<(State, int), float> QTable; // Tabla Q
 
         float total_reward = 0; // Recompensa total de este episodio
-        string filePath = "Assets/Scripts/Grupo G/TablaQ.csv"; // Archivo .csv donde se guarda la tabla
+        string filePath = "Assets/Scripts/GrupoG/TablaQ.csv"; // Archivo .csv donde se guarda la tabla
         int saveRate = 0; // Para calcular la frecuencia de guardado
 
         // Se carga la tabla Q desde el archivo y se inicializa el mundo para el primer episodio
