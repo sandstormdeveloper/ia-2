@@ -12,11 +12,11 @@ namespace GrupoG
 {
     public class QMindTester : IQMind
     {
-
-        private Dictionary<(State, int), float> QTable;
+        private Dictionary<(State, int), float> QTable; // Tabla Q
         private WorldInfo _worldInfo;
-        string filePath = "Assets/Scripts/Grupo G/TablaQ.csv";
+        string filePath = "Assets/Scripts/Grupo G/TablaQ.csv"; // Archivo .csv donde se guarda la tabla
 
+        // Se inicializa la tabla Q y se cargan los valores guardados
         public void Initialize(WorldInfo worldInfo)
         {
             Debug.Log("QMindDummy: initialized");
@@ -25,6 +25,7 @@ namespace GrupoG
             QTable = LoadQTable(filePath);
         }
 
+        // Se ejecuta cada paso y busca la mejor acción según la tabla Q
         public CellInfo GetNextStep(CellInfo currentPosition, CellInfo otherPosition)
         {
             Debug.Log("QMindDummy: GetNextStep");
@@ -39,6 +40,7 @@ namespace GrupoG
             return currentPosition;
         }
 
+        // Se escoge la mejor acción para el estado actual
         private int GetBestAction(State state)
         {
             float maxQValue = float.MinValue;
@@ -57,11 +59,13 @@ namespace GrupoG
             return bestAction;
         }
 
+        // Se busca el valor en la tabla
         private float GetQValue(State state, int action)
         {
             return QTable.TryGetValue((state, action), out float value) ? value : 0f;
         }
 
+        // Se carga la tabla
         public Dictionary<(State, int), float> LoadQTable(string filePath)
         {
 
@@ -90,6 +94,7 @@ namespace GrupoG
             }
         }
 
+        // Se pasa del ID guardado en el .csv a un estado de la clase State
         private State ParseStateFromId(string stateId)
         {
             bool NWall = stateId[0] == '1';

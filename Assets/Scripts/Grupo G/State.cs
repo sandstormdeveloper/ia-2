@@ -8,15 +8,15 @@ namespace GrupoG
 {
     public class State
     {
-        public bool NWall;
-        public bool SWall;
-        public bool EWall;
-        public bool OWall;
+        public bool NWall; // Pared al norte
+        public bool SWall; // Pared al sur
+        public bool EWall; // Pared al este
+        public bool OWall; // Pared al oeste
 
-        public bool playerAbove;
-        public bool playerRight;
+        public bool playerAbove; // El jugador esta encima
+        public bool playerRight; // El jugador esta a la derecha
 
-        public int playerDistance;
+        public int playerDistance; // Distancia al jugador
 
         public State(CellInfo AgentPos, CellInfo OtherPos, WorldInfo worldInfo)
         {
@@ -33,6 +33,7 @@ namespace GrupoG
             }
         }
 
+        // Se simplifica la distancia al jugador, para que sea más facil de guardar en la tabla
         private int BinDistance(float distance)
         {
             if (distance < 3f) return 0;  // Cerca
@@ -65,6 +66,7 @@ namespace GrupoG
             return hash.ToHashCode();
         }
 
+        // Genera un ID único para cada estado
         public string StateId()
         {
             string id = "";
