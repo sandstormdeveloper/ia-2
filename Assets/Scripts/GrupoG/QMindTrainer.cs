@@ -8,7 +8,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Unity.VisualScripting;
-using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
@@ -206,68 +205,41 @@ namespace GrupoG
         {
             using (StreamWriter writer = new StreamWriter(filePath))
             {
-                writer.WriteLine("State Action 0 Action 1 Action 2 Action 3 Action 4");
+                // Escribir encabezado con cada atributo del estado y las acciones
+                writer.WriteLine("NWall SWall EWall OWall NPlayer SPlayer EPlayer OPlayer Dist Action0 Action1 Action2 Action3 Action4");
+
                 HashSet<string> statesWritten = new HashSet<string>();
 
                 foreach (var entry in QTable)
                 {
-                    string stateId = entry.Key.Item1.StateId();
-                    if (!statesWritten.Contains(stateId))
+                    State state = entry.Key.Item1;
+
+                    // Serializar cada atributo del estado en columnas separadas
+                    string stateString = $"{(state.NWall ? 1 : 0)} " +
+                                         $"{(state.SWall ? 1 : 0)} " +
+                                         $"{(state.EWall ? 1 : 0)} " +
+                                         $"{(state.OWall ? 1 : 0)} " +
+                                         $"{(state.NPlayer ? 1 : 0)} " +
+                                         $"{(state.SPlayer ? 1 : 0)} " +
+                                         $"{(state.EPlayer ? 1 : 0)} " +
+                                         $"{(state.OPlayer ? 1 : 0)} " +
+                                         $"{state.playerDistance}";
+
+                    if (!statesWritten.Contains(stateString))
                     {
-                        writer.Write(stateId);
+                        writer.Write(stateString); // Escribe el estado sin ID codificado
+
                         for (int action = 0; action < 5; action++)
                         {
-                            writer.Write($" {GetQValue(entry.Key.Item1, action),8:F2}");
+                            writer.Write($" {GetQValue(state, action),8:F2}");
                         }
+
                         writer.WriteLine();
-                        statesWritten.Add(stateId);
+                        statesWritten.Add(stateString);
                     }
                 }
             }
             Debug.Log($"QTable saved successfully to {filePath}");
-        }
-
-        List<State> GenerateStates()
-        {
-            List<State> states = new List<State>();
-
-            // Generar todas las combinaciones posibles de paredes (4 bits -> 16 combinaciones)
-            for (int walls = 0; walls < 16; walls++)
-            {
-                bool NWall = (walls & 0b1000) != 0;
-                bool SWall = (walls & 0b0100) != 0;
-                bool EWall = (walls & 0b0010) != 0;
-                bool OWall = (walls & 0b0001) != 0;
-
-                // Generar todas las combinaciones posibles de la posición relativa del jugador (5 combinaciones: N, S, E, O, ninguna)
-                for (int playerPos = 0; playerPos < 5; playerPos++)
-                {
-                    bool NPlayer = (playerPos == 0);
-                    bool SPlayer = (playerPos == 1);
-                    bool EPlayer = (playerPos == 2);
-                    bool OPlayer = (playerPos == 3);
-
-                    // Generar todas las distancias posibles al jugador (3 valores: 0, 1, 2)
-                    for (int distance = 0; distance < 3; distance++)
-                    {
-                        State newState = new State(null, null, null)
-                        {
-                            NWall = NWall,
-                            SWall = SWall,
-                            EWall = EWall,
-                            OWall = OWall,
-                            NPlayer = NPlayer,
-                            SPlayer = SPlayer,
-                            EPlayer = EPlayer,
-                            OPlayer = OPlayer,
-                            playerDistance = distance
-                        };
-                        states.Add(newState);
-                    }
-                }
-            }
-
-            return states;
         }
 
         // Se carga la tabla
@@ -275,56 +247,38 @@ namespace GrupoG
         {
             using (StreamReader reader = new StreamReader(filePath))
             {
-                string header = reader.ReadLine();
+                string header = reader.ReadLine(); // Leer la primera línea con los nombres de columnas
 
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
                     string[] parts = line.Split(' ');
 
-                    string stateId = parts[0].Trim();
-                    State state = ParseStateFromId(stateId);
+                    // Extraer valores del estado desde la línea
+                    State state = new State(null, null, null)
+                    {
+                        NWall = parts[0] == "1",
+                        SWall = parts[1] == "1",
+                        EWall = parts[2] == "1",
+                        OWall = parts[3] == "1",
+                        NPlayer = parts[4] == "1",
+                        SPlayer = parts[5] == "1",
+                        EPlayer = parts[6] == "1",
+                        OPlayer = parts[7] == "1",
+                        playerDistance = int.Parse(parts[8])
+                    };
 
+                    // Leer valores Q de las acciones
                     for (int action = 0; action < 5; action++)
                     {
-                        if (float.TryParse(parts[action + 1], out float qValue))
+                        if (float.TryParse(parts[action + 9], out float qValue))
                         {
                             QTable[(state, action)] = qValue;
                         }
                     }
                 }
-
-                return QTable;
             }
-        }
-
-        // Se pasa del ID guardado en el .csv a un estado de la clase State
-        private State ParseStateFromId(string stateId)
-        {
-            bool NWall = stateId[0] == '1';
-            bool SWall = stateId[1] == '1';
-            bool EWall = stateId[2] == '1';
-            bool OWall = stateId[3] == '1';
-
-            bool NPlayer = stateId[4] == '1';
-            bool SPlayer = stateId[5] == '1';
-            bool EPlayer = stateId[6] == '1';
-            bool OPlayer = stateId[7] == '1';
-
-            int playerDistance = int.Parse(stateId[8].ToString());
-
-            return new State(null, null, null)
-            {
-                NWall = NWall,
-                SWall = SWall,
-                EWall = EWall,
-                OWall = OWall,
-                NPlayer = NPlayer,
-                SPlayer = SPlayer,
-                EPlayer = EPlayer,
-                OPlayer = OPlayer,
-                playerDistance = playerDistance
-            };
+            return QTable;
         }
 
         // Se calcula la recompensa otorgada, según la acción tomada

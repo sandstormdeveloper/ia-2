@@ -68,59 +68,40 @@ namespace GrupoG
         // Se carga la tabla
         public Dictionary<(State, int), float> LoadQTable(string filePath)
         {
-
             using (StreamReader reader = new StreamReader(filePath))
             {
-                string header = reader.ReadLine();
+                string header = reader.ReadLine(); // Leer la primera línea con los nombres de columnas
 
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
                     string[] parts = line.Split(' ');
 
-                    string stateId = parts[0].Trim();
-                    State state = ParseStateFromId(stateId);
+                    // Extraer valores del estado desde la línea
+                    State state = new State(null, null, null)
+                    {
+                        NWall = parts[0] == "1",
+                        SWall = parts[1] == "1",
+                        EWall = parts[2] == "1",
+                        OWall = parts[3] == "1",
+                        NPlayer = parts[4] == "1",
+                        SPlayer = parts[5] == "1",
+                        EPlayer = parts[6] == "1",
+                        OPlayer = parts[7] == "1",
+                        playerDistance = int.Parse(parts[8])
+                    };
 
+                    // Leer valores Q de las acciones
                     for (int action = 0; action < 5; action++)
                     {
-                        if (float.TryParse(parts[action + 1], out float qValue))
+                        if (float.TryParse(parts[action + 9], out float qValue))
                         {
                             QTable[(state, action)] = qValue;
                         }
                     }
                 }
-
-                return QTable;
             }
-        }
-
-        // Se pasa del ID guardado en el .csv a un estado de la clase State
-        private State ParseStateFromId(string stateId)
-        {
-            bool NWall = stateId[0] == '1';
-            bool SWall = stateId[1] == '1';
-            bool EWall = stateId[2] == '1';
-            bool OWall = stateId[3] == '1';
-
-            bool NPlayer = stateId[4] == '1';
-            bool SPlayer = stateId[5] == '1';
-            bool EPlayer = stateId[6] == '1';
-            bool OPlayer = stateId[7] == '1';
-
-            int playerDistance = int.Parse(stateId[8].ToString());
-
-            return new State(null, null, null)
-            {
-                NWall = NWall,
-                SWall = SWall,
-                EWall = EWall,
-                OWall = OWall,
-                NPlayer = NPlayer,
-                SPlayer = SPlayer,
-                EPlayer = EPlayer,
-                OPlayer = OPlayer,
-                playerDistance = playerDistance
-            };
+            return QTable;
         }
     }
 }

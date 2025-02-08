@@ -74,25 +74,5 @@ namespace GrupoG
             hash.Add(playerDistance);
             return hash.ToHashCode();
         }
-
-        // Genera un ID único para cada estado
-        public string StateId()
-        {
-            string id = "";
-
-            id += NWall ? 1 : 0;
-            id += SWall ? 1 : 0;
-            id += EWall ? 1 : 0;
-            id += OWall ? 1 : 0;
-
-            id += NPlayer ? 1 : 0;
-            id += SPlayer ? 1 : 0;
-            id += EPlayer ? 1 : 0;
-            id += OPlayer ? 1 : 0;
-
-            id += playerDistance;
-
-            return id;
-        }
     }
 }
