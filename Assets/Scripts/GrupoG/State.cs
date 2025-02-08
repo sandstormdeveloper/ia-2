@@ -13,8 +13,10 @@ namespace GrupoG
         public bool EWall; // Pared al este
         public bool OWall; // Pared al oeste
 
-        public bool playerAbove; // El jugador esta encima
-        public bool playerRight; // El jugador esta a la derecha
+        public bool NPlayer; // Pared al norte
+        public bool SPlayer; // Pared al sur
+        public bool EPlayer; // Pared al este
+        public bool OPlayer; // Pared al oeste
 
         public int playerDistance; // Distancia al jugador
 
@@ -27,8 +29,11 @@ namespace GrupoG
                 EWall = !worldInfo.NextCell(AgentPos, Directions.Right).Walkable;
                 OWall = !worldInfo.NextCell(AgentPos, Directions.Left).Walkable;
 
-                playerAbove = OtherPos.y > AgentPos.y;
-                playerRight = OtherPos.x > AgentPos.x;
+                NPlayer = AgentPos.y < OtherPos.y;
+                SPlayer = AgentPos.y > OtherPos.y;
+                EPlayer = AgentPos.x < OtherPos.x;
+                OPlayer = AgentPos.x > OtherPos.x;
+
                 playerDistance = BinDistance(AgentPos.Distance(OtherPos, CellInfo.DistanceType.Euclidean));
             }
         }
@@ -48,8 +53,10 @@ namespace GrupoG
                    SWall == state.SWall &&
                    EWall == state.EWall &&
                    OWall == state.OWall &&
-                   playerAbove == state.playerAbove &&
-                   playerRight == state.playerRight &&
+                   NPlayer == state.NPlayer &&
+                   SPlayer == state.SPlayer &&
+                   EPlayer == state.EPlayer &&
+                   OPlayer == state.OPlayer &&
                    playerDistance == state.playerDistance;
         }
 
@@ -60,8 +67,10 @@ namespace GrupoG
             hash.Add(SWall);
             hash.Add(EWall);
             hash.Add(OWall);
-            hash.Add(playerAbove);
-            hash.Add(playerRight);
+            hash.Add(NPlayer);
+            hash.Add(SPlayer);
+            hash.Add(EPlayer);
+            hash.Add(OPlayer);
             hash.Add(playerDistance);
             return hash.ToHashCode();
         }
@@ -76,8 +85,10 @@ namespace GrupoG
             id += EWall ? 1 : 0;
             id += OWall ? 1 : 0;
 
-            id += playerAbove ? 1 : 0;
-            id += playerRight ? 1 : 0;
+            id += NPlayer ? 1 : 0;
+            id += SPlayer ? 1 : 0;
+            id += EPlayer ? 1 : 0;
+            id += OPlayer ? 1 : 0;
 
             id += playerDistance;
 

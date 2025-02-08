@@ -78,15 +78,15 @@ namespace GrupoG
                     string line = reader.ReadLine();
                     string[] parts = line.Split(' ');
 
-                    if (parts.Length == 3)
+                    string stateId = parts[0].Trim();
+                    State state = ParseStateFromId(stateId);
+
+                    for (int action = 0; action < 5; action++)
                     {
-                        string stateId = parts[0];
-                        int action = int.Parse(parts[1]);
-                        float qValue = float.Parse(parts[2]);
-
-                        State state = ParseStateFromId(stateId);
-
-                        QTable[(state, action)] = qValue;
+                        if (float.TryParse(parts[action + 1], out float qValue))
+                        {
+                            QTable[(state, action)] = qValue;
+                        }
                     }
                 }
 
@@ -102,10 +102,12 @@ namespace GrupoG
             bool EWall = stateId[2] == '1';
             bool OWall = stateId[3] == '1';
 
-            bool playerAbove = stateId[4] == '1';
-            bool playerRight = stateId[5] == '1';
+            bool NPlayer = stateId[4] == '1';
+            bool SPlayer = stateId[5] == '1';
+            bool EPlayer = stateId[6] == '1';
+            bool OPlayer = stateId[7] == '1';
 
-            int playerDistance = int.Parse(stateId[6].ToString());
+            int playerDistance = int.Parse(stateId[8].ToString());
 
             return new State(null, null, null)
             {
@@ -113,8 +115,10 @@ namespace GrupoG
                 SWall = SWall,
                 EWall = EWall,
                 OWall = OWall,
-                playerAbove = playerAbove,
-                playerRight = playerRight,
+                NPlayer = NPlayer,
+                SPlayer = SPlayer,
+                EPlayer = EPlayer,
+                OPlayer = OPlayer,
                 playerDistance = playerDistance
             };
         }

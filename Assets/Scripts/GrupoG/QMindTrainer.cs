@@ -46,8 +46,22 @@ namespace GrupoG
             _qMindTrainerParams = qMindTrainerParams;
 
             QTable = new Dictionary<(State, int), float>();
+            InitializeQTable();
             QTable = LoadQTable(filePath);
             ResetEnvironment();
+        }
+
+        private void InitializeQTable()
+        {
+            QTable = new Dictionary<(State, int), float>();
+
+            foreach (var state in GenerateAllPossibleStates())
+            {
+                for (int action = 0; action < 5; action++)
+                {
+                    QTable[(state, action)] = 0f;
+                }
+            }
         }
 
         // Algoritmo principal, se ejecuta cada paso
@@ -140,27 +154,125 @@ namespace GrupoG
             QTable[(state, action)] = updatedQ;
         }
 
+        private List<State> GenerateAllPossibleStates()
+        {
+            List<State> states = new List<State>();
+
+            for (int nWall = 0; nWall <= 1; nWall++)
+            {
+                for (int sWall = 0; sWall <= 1; sWall++)
+                {
+                    for (int eWall = 0; eWall <= 1; eWall++)
+                    {
+                        for (int oWall = 0; oWall <= 1; oWall++)
+                        {
+                            for (int nPlayer = 0; nPlayer <= 1; nPlayer++)
+                            {
+                                for (int sPlayer = 0; sPlayer <= 1; sPlayer++)
+                                {
+                                    for (int ePlayer = 0; ePlayer <= 1; ePlayer++)
+                                    {
+                                        for (int oPlayer = 0; oPlayer <= 1; oPlayer++)
+                                        {
+                                            for (int playerDistance = 0; playerDistance <= 2; playerDistance++)
+                                            {
+                                                states.Add(new State(null, null, null)
+                                                {
+                                                    NWall = nWall == 1,
+                                                    SWall = sWall == 1,
+                                                    EWall = eWall == 1,
+                                                    OWall = oWall == 1,
+                                                    NPlayer = nPlayer == 1,
+                                                    SPlayer = sPlayer == 1,
+                                                    EPlayer = ePlayer == 1,
+                                                    OPlayer = oPlayer == 1,
+                                                    playerDistance = playerDistance
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return states;
+        }
+
         // Se guarda la tabla en el archivo .csv externo
         public void SaveQTableToCsv(string filePath)
         {
             using (StreamWriter writer = new StreamWriter(filePath))
             {
-                writer.WriteLine("State Action QValue");
+                writer.WriteLine("State Action 0 Action 1 Action 2 Action 3 Action 4");
+                HashSet<string> statesWritten = new HashSet<string>();
+
                 foreach (var entry in QTable)
                 {
                     string stateId = entry.Key.Item1.StateId();
-                    int action = entry.Key.Item2;
-                    float qValue = entry.Value;
-                    writer.WriteLine($"{stateId} {action} {qValue}");
+                    if (!statesWritten.Contains(stateId))
+                    {
+                        writer.Write(stateId);
+                        for (int action = 0; action < 5; action++)
+                        {
+                            writer.Write($" {GetQValue(entry.Key.Item1, action),8:F2}");
+                        }
+                        writer.WriteLine();
+                        statesWritten.Add(stateId);
+                    }
                 }
             }
             Debug.Log($"QTable saved successfully to {filePath}");
         }
 
+        List<State> GenerateStates()
+        {
+            List<State> states = new List<State>();
+
+            // Generar todas las combinaciones posibles de paredes (4 bits -> 16 combinaciones)
+            for (int walls = 0; walls < 16; walls++)
+            {
+                bool NWall = (walls & 0b1000) != 0;
+                bool SWall = (walls & 0b0100) != 0;
+                bool EWall = (walls & 0b0010) != 0;
+                bool OWall = (walls & 0b0001) != 0;
+
+                // Generar todas las combinaciones posibles de la posición relativa del jugador (5 combinaciones: N, S, E, O, ninguna)
+                for (int playerPos = 0; playerPos < 5; playerPos++)
+                {
+                    bool NPlayer = (playerPos == 0);
+                    bool SPlayer = (playerPos == 1);
+                    bool EPlayer = (playerPos == 2);
+                    bool OPlayer = (playerPos == 3);
+
+                    // Generar todas las distancias posibles al jugador (3 valores: 0, 1, 2)
+                    for (int distance = 0; distance < 3; distance++)
+                    {
+                        State newState = new State(null, null, null)
+                        {
+                            NWall = NWall,
+                            SWall = SWall,
+                            EWall = EWall,
+                            OWall = OWall,
+                            NPlayer = NPlayer,
+                            SPlayer = SPlayer,
+                            EPlayer = EPlayer,
+                            OPlayer = OPlayer,
+                            playerDistance = distance
+                        };
+                        states.Add(newState);
+                    }
+                }
+            }
+
+            return states;
+        }
+
         // Se carga la tabla
         public Dictionary<(State, int), float> LoadQTable(string filePath)
         {
-
             using (StreamReader reader = new StreamReader(filePath))
             {
                 string header = reader.ReadLine();
@@ -170,15 +282,15 @@ namespace GrupoG
                     string line = reader.ReadLine();
                     string[] parts = line.Split(' ');
 
-                    if (parts.Length == 3)
+                    string stateId = parts[0].Trim();
+                    State state = ParseStateFromId(stateId);
+
+                    for (int action = 0; action < 5; action++)
                     {
-                        string stateId = parts[0];
-                        int action = int.Parse(parts[1]);
-                        float qValue = float.Parse(parts[2]);
-
-                        State state = ParseStateFromId(stateId);
-
-                        QTable[(state, action)] = qValue;
+                        if (float.TryParse(parts[action + 1], out float qValue))
+                        {
+                            QTable[(state, action)] = qValue;
+                        }
                     }
                 }
 
@@ -194,10 +306,12 @@ namespace GrupoG
             bool EWall = stateId[2] == '1';
             bool OWall = stateId[3] == '1';
 
-            bool playerAbove = stateId[4] == '1';
-            bool playerRight = stateId[5] == '1';
+            bool NPlayer = stateId[4] == '1';
+            bool SPlayer = stateId[5] == '1';
+            bool EPlayer = stateId[6] == '1';
+            bool OPlayer = stateId[7] == '1';
 
-            int playerDistance = int.Parse(stateId[6].ToString());
+            int playerDistance = int.Parse(stateId[8].ToString());
 
             return new State(null, null, null)
             {
@@ -205,8 +319,10 @@ namespace GrupoG
                 SWall = SWall,
                 EWall = EWall,
                 OWall = OWall,
-                playerAbove = playerAbove,
-                playerRight = playerRight,
+                NPlayer = NPlayer,
+                SPlayer = SPlayer,
+                EPlayer = EPlayer,
+                OPlayer = OPlayer,
                 playerDistance = playerDistance
             };
         }
