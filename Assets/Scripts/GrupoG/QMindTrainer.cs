@@ -296,9 +296,13 @@ namespace GrupoG
             {
                 return -10f;
             } 
-            else
+            else if (newDistance == distance) 
             {
-                return 10f;
+                return 0f;
+            }
+            else 
+            {
+                return 50f;
             }
         }
 
