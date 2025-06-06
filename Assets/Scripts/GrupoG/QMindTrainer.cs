@@ -66,7 +66,7 @@ namespace GrupoG
         // Algoritmo principal, se ejecuta cada paso
         public void DoStep(bool train)
         {
-            if (AgentPosition == OtherPosition || !AgentPosition.Walkable || CurrentStep >= _qMindTrainerParams.maxSteps) // Estado terminal, finaliza el episodio
+            if (AgentPosition == OtherPosition || !AgentPosition.Walkable || (CurrentStep >= _qMindTrainerParams.maxSteps && _qMindTrainerParams.maxSteps != -1)) // Estado terminal, finaliza el episodio
             {
                 ReturnAveraged = Mathf.Round((ReturnAveraged * 0.9f + Return * 0.1f) * 100) / 100;
                 OnEpisodeFinished?.Invoke(this, EventArgs.Empty);
