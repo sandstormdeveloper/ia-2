@@ -17767,7 +17767,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &414741301
 Transform:
   m_ObjectHideFlags: 0
@@ -18199,7 +18199,7 @@ MonoBehaviour:
   train: 1
   algorithmParams:
     alpha: 0.2
-    epsilon: 0.8
+    epsilon: 0.7
     gamma: 0.9
     episodes: 5000
     maxSteps: 5100
@@ -28879,7 +28879,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &697875572
 MonoBehaviour:
   m_ObjectHideFlags: 0
