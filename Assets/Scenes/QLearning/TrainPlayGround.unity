@@ -18199,9 +18199,9 @@ MonoBehaviour:
   train: 1
   algorithmParams:
     alpha: 0.2
-    epsilon: 0.7
+    epsilon: 0.4
     gamma: 0.9
-    episodes: 5000
+    episodes: 4000
     maxSteps: 5100
     episodesBetweenSaves: 100
 --- !u!4 &430024629
