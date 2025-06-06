@@ -56,7 +56,7 @@ namespace GrupoG
 
             foreach (var state in GenerateAllPossibleStates())
             {
-                for (int action = 0; action < 5; action++)
+                for (int action = 0; action < 4; action++)
                 {
                     QTable[(state, action)] = 0f;
                 }
@@ -106,7 +106,7 @@ namespace GrupoG
         {
             if (Random.Range(0f, 1f) < _qMindTrainerParams.epsilon) // El epsilon es la exploración, cuando es más alto, es más probable que la accion sea aleatoria
             {
-                return Random.Range(0, 5);
+                return Random.Range(0, 4);
             }
 
             return GetBestAction(state);
@@ -118,7 +118,7 @@ namespace GrupoG
             float maxQValue = float.MinValue;
             int bestAction = 0;
 
-            for (int action = 0; action < 5; action++)
+            for (int action = 0; action < 4; action++)
             {
                 float qValue = GetQValue(state, action);
                 if (qValue > maxQValue) 
@@ -143,7 +143,7 @@ namespace GrupoG
             float currentQ = GetQValue(state, action);
             float maxNextQ = float.MinValue;
 
-            for (int nextAction = 0; nextAction < 5; nextAction++)
+            for (int nextAction = 0; nextAction < 4; nextAction++)
             {
                 float nextQ = GetQValue(nextState, nextAction);
                 maxNextQ = MathF.Max(maxNextQ, nextQ);
@@ -206,7 +206,7 @@ namespace GrupoG
             using (StreamWriter writer = new StreamWriter(filePath))
             {
                 // Escribir encabezado con cada atributo del estado y las acciones
-                writer.WriteLine("NWall SWall EWall OWall NPlayer SPlayer EPlayer OPlayer Dist Action0 Action1 Action2 Action3 Action4");
+                writer.WriteLine("NWall SWall EWall OWall NPlayer SPlayer EPlayer OPlayer Dist Up Right Down Left");
 
                 HashSet<string> statesWritten = new HashSet<string>();
 
@@ -229,7 +229,7 @@ namespace GrupoG
                     {
                         writer.Write(stateString); // Escribe el estado sin ID codificado
 
-                        for (int action = 0; action < 5; action++)
+                        for (int action = 0; action < 4; action++)
                         {
                             writer.Write($" {GetQValue(state, action),8:F2}");
                         }
@@ -269,7 +269,7 @@ namespace GrupoG
                     };
 
                     // Leer valores Q de las acciones
-                    for (int action = 0; action < 5; action++)
+                    for (int action = 0; action < 4; action++)
                     {
                         if (float.TryParse(parts[action + 9], out float qValue))
                         {
@@ -324,11 +324,10 @@ namespace GrupoG
         {
             CellInfo newAgentPosition = AgentPosition;
 
-            if (action < 4)
-            {
-                newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
-            }
-            
+            newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
+            Debug.Log(action);
+            Debug.Log(_worldInfo.AllowedMovements.FromIntValue(action));
+
             CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, AgentPosition, 1);
             CellInfo newOtherPosition = path.Length > 0 ? path[0] : OtherPosition;
 

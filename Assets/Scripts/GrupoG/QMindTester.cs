@@ -32,12 +32,7 @@ namespace GrupoG
             State state = new State(currentPosition, otherPosition, _worldInfo);
             int action = GetBestAction(state);
 
-            if (action < 4)
-            {
-                return _worldInfo.NextCell(currentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
-            }
-
-            return currentPosition;
+            return _worldInfo.NextCell(currentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
         }
 
         // Se escoge la mejor acción para el estado actual
@@ -46,7 +41,7 @@ namespace GrupoG
             float maxQValue = float.MinValue;
             int bestAction = 0;
 
-            for (int action = 0; action < 5; action++)
+            for (int action = 0; action < 4; action++)
             {
                 float qValue = GetQValue(state, action);
                 if (qValue > maxQValue)
@@ -92,7 +87,7 @@ namespace GrupoG
                     };
 
                     // Leer valores Q de las acciones
-                    for (int action = 0; action < 5; action++)
+                    for (int action = 0; action < 4; action++)
                     {
                         if (float.TryParse(parts[action + 9], out float qValue))
                         {
