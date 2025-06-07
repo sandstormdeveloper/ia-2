@@ -63,40 +63,70 @@ namespace GrupoG
         // Se carga la tabla
         public Dictionary<(State, int), float> LoadQTable(string filePath)
         {
-            using (StreamReader reader = new StreamReader(filePath))
+            Dictionary<(State, int), float> qTable = new Dictionary<(State, int), float>();
+
+            if (!File.Exists(filePath))
+                return qTable;
+
+            string[] lines = File.ReadAllLines(filePath);
+
+            // Saltar la cabecera (línea 0)
+            for (int i = 1; i < lines.Length; i++)
             {
-                string header = reader.ReadLine(); // Leer la primera línea con los nombres de columnas
+                string[] values = lines[i].Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-                while (!reader.EndOfStream)
+                bool nWall = bool.Parse(values[0]);
+                bool sWall = bool.Parse(values[1]);
+                bool eWall = bool.Parse(values[2]);
+                bool oWall = bool.Parse(values[3]);
+
+                bool nPlayer = bool.Parse(values[4]);
+                bool sPlayer = bool.Parse(values[5]);
+                bool ePlayer = bool.Parse(values[6]);
+                bool oPlayer = bool.Parse(values[7]);
+
+                int playerDistance = int.Parse(values[8]);
+                int action = ToIntValue(values[9]);
+                float qValue = float.Parse(values[10]);
+
+                State state = new State(null, null, null)
                 {
-                    string line = reader.ReadLine();
-                    string[] parts = line.Split(' ');
+                    NWall = nWall,
+                    SWall = sWall,
+                    EWall = eWall,
+                    OWall = oWall,
+                    NPlayer = nPlayer,
+                    SPlayer = sPlayer,
+                    EPlayer = ePlayer,
+                    OPlayer = oPlayer,
+                    playerDistance = playerDistance
+                };
 
-                    // Extraer valores del estado desde la línea
-                    State state = new State(null, null, null)
-                    {
-                        NWall = parts[0] == "1",
-                        SWall = parts[1] == "1",
-                        EWall = parts[2] == "1",
-                        OWall = parts[3] == "1",
-                        NPlayer = parts[4] == "1",
-                        SPlayer = parts[5] == "1",
-                        EPlayer = parts[6] == "1",
-                        OPlayer = parts[7] == "1",
-                        playerDistance = int.Parse(parts[8])
-                    };
-
-                    // Leer valores Q de las acciones
-                    for (int action = 0; action < 4; action++)
-                    {
-                        if (float.TryParse(parts[action + 9], out float qValue))
-                        {
-                            QTable[(state, action)] = qValue;
-                        }
-                    }
-                }
+                qTable[(state, action)] = qValue;
             }
-            return QTable;
+
+            return qTable;
+        }
+
+        int ToIntValue(string action)
+        {
+            switch (action)
+            {
+                case "Up":
+                    return 0;
+
+                case "Right":
+                    return 1;
+
+                case "Down":
+                    return 2;
+
+                case "Left":
+                    return 3;
+
+                default:
+                    return -1;
+            }
         }
     }
 }

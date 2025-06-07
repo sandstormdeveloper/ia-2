@@ -46,7 +46,11 @@ namespace GrupoG
 
             QTable = new Dictionary<(State, int), float>();
             InitializeQTable();
-            QTable = LoadQTable(filePath);
+            var loadedQTable = LoadQTable(filePath);
+            foreach (var entry in loadedQTable)
+            {
+                QTable[entry.Key] = entry.Value; // Sobrescribe si existe
+            }
             ResetEnvironment();
         }
 
@@ -204,80 +208,92 @@ namespace GrupoG
         {
             using (StreamWriter writer = new StreamWriter(filePath))
             {
-                // Escribir encabezado con cada atributo del estado y las acciones
-                writer.WriteLine("NWall SWall EWall OWall NPlayer SPlayer EPlayer OPlayer Dist Up Right Down Left");
+                // Escribir cabecera separada por espacios
+                writer.WriteLine("NWall SWall EWall OWall NPlayer SPlayer EPlayer OPlayer PlayerDistance Action QValue");
 
-                HashSet<string> statesWritten = new HashSet<string>();
-
+                // Escribir cada entrada de la tabla Q
                 foreach (var entry in QTable)
                 {
-                    State state = entry.Key.Item1;
+                    State s = entry.Key.Item1;
+                    int action = entry.Key.Item2;
+                    float qValue = entry.Value;
 
-                    // Serializar cada atributo del estado en columnas separadas
-                    string stateString = $"{(state.NWall ? 1 : 0)} " +
-                                         $"{(state.SWall ? 1 : 0)} " +
-                                         $"{(state.EWall ? 1 : 0)} " +
-                                         $"{(state.OWall ? 1 : 0)} " +
-                                         $"{(state.NPlayer ? 1 : 0)} " +
-                                         $"{(state.SPlayer ? 1 : 0)} " +
-                                         $"{(state.EPlayer ? 1 : 0)} " +
-                                         $"{(state.OPlayer ? 1 : 0)} " +
-                                         $"{state.playerDistance}";
+                    string line = $"{s.NWall} {s.SWall} {s.EWall} {s.OWall} " +
+                                  $"{s.NPlayer} {s.SPlayer} {s.EPlayer} {s.OPlayer} " +
+                                  $"{s.playerDistance} {_worldInfo.AllowedMovements.FromIntValue(action)} {qValue}";
 
-                    if (!statesWritten.Contains(stateString))
-                    {
-                        writer.Write(stateString); // Escribe el estado sin ID codificado
-
-                        for (int action = 0; action < 4; action++)
-                        {
-                            writer.Write($" {GetQValue(state, action),8:F2}");
-                        }
-
-                        writer.WriteLine();
-                        statesWritten.Add(stateString);
-                    }
+                    writer.WriteLine(line);
                 }
             }
-            Debug.Log($"QTable saved successfully to {filePath}");
         }
 
         // Se carga la tabla
         public Dictionary<(State, int), float> LoadQTable(string filePath)
         {
-            using (StreamReader reader = new StreamReader(filePath))
+            Dictionary<(State, int), float> qTable = new Dictionary<(State, int), float>();
+
+            if (!File.Exists(filePath))
+                return qTable;
+
+            string[] lines = File.ReadAllLines(filePath);
+
+            // Saltar la cabecera (línea 0)
+            for (int i = 1; i < lines.Length; i++)
             {
-                string header = reader.ReadLine(); // Leer la primera línea con los nombres de columnas
+                string[] values = lines[i].Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-                while (!reader.EndOfStream)
+                bool nWall = bool.Parse(values[0]);
+                bool sWall = bool.Parse(values[1]);
+                bool eWall = bool.Parse(values[2]);
+                bool oWall = bool.Parse(values[3]);
+
+                bool nPlayer = bool.Parse(values[4]);
+                bool sPlayer = bool.Parse(values[5]);
+                bool ePlayer = bool.Parse(values[6]);
+                bool oPlayer = bool.Parse(values[7]);
+
+                int playerDistance = int.Parse(values[8]);
+                int action = ToIntValue(values[9]);
+                float qValue = float.Parse(values[10]);
+
+                State state = new State(null, null, null)
                 {
-                    string line = reader.ReadLine();
-                    string[] parts = line.Split(' ');
+                    NWall = nWall,
+                    SWall = sWall,
+                    EWall = eWall,
+                    OWall = oWall,
+                    NPlayer = nPlayer,
+                    SPlayer = sPlayer,
+                    EPlayer = ePlayer,
+                    OPlayer = oPlayer,
+                    playerDistance = playerDistance
+                };
 
-                    // Extraer valores del estado desde la línea
-                    State state = new State(null, null, null)
-                    {
-                        NWall = parts[0] == "1",
-                        SWall = parts[1] == "1",
-                        EWall = parts[2] == "1",
-                        OWall = parts[3] == "1",
-                        NPlayer = parts[4] == "1",
-                        SPlayer = parts[5] == "1",
-                        EPlayer = parts[6] == "1",
-                        OPlayer = parts[7] == "1",
-                        playerDistance = int.Parse(parts[8])
-                    };
-
-                    // Leer valores Q de las acciones
-                    for (int action = 0; action < 4; action++)
-                    {
-                        if (float.TryParse(parts[action + 9], out float qValue))
-                        {
-                            QTable[(state, action)] = qValue;
-                        }
-                    }
-                }
+                qTable[(state, action)] = qValue;
             }
-            return QTable;
+
+            return qTable;
+        }
+
+        int ToIntValue(string action)
+        {
+            switch(action)
+            {
+                case "Up":
+                    return 0;
+
+                case "Right":
+                    return 1;
+
+                case "Down":
+                    return 2;
+
+                case "Left":
+                    return 3;
+
+                default:
+                    return -1;
+            }
         }
 
         // Se calcula la recompensa otorgada, según la acción tomada
@@ -324,8 +340,6 @@ namespace GrupoG
             CellInfo newAgentPosition = AgentPosition;
 
             newAgentPosition = _worldInfo.NextCell(AgentPosition, _worldInfo.AllowedMovements.FromIntValue(action));
-            Debug.Log(action);
-            Debug.Log(_worldInfo.AllowedMovements.FromIntValue(action));
 
             CellInfo[] path = _navigationAlgorithm.GetPath(OtherPosition, AgentPosition, 1);
             CellInfo newOtherPosition = path.Length > 0 ? path[0] : OtherPosition;
